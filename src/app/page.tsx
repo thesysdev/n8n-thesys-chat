@@ -4,5 +4,7 @@ import { C1Chat } from "@thesysai/genui-sdk";
 import "@crayonai/react-ui/styles/index.css";
 
 export default function Home() {
-  return <C1Chat apiUrl="/api/chat" theme={{ mode: "dark" }} />;
+  return (
+    <C1Chat apiUrl="/api/chat" theme={{ mode: "light" }} agentName="N8N Chat" />
+  );
 }
