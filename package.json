@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@crayonai/react-ui": "^0.8.31",
+    "@crayonai/react-ui": "^0.8.42",
     "@crayonai/stream": "^0.6.4",
     "@thesysai/genui-sdk": "^0.6.40",
     "next": "15.2.4",
