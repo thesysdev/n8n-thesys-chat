@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Widget Test</title>
+  </head>
+  <body>
+    <script type="module">
+      import { createChat } from "/src/index.ts";
+
+      // Create the chat widget
+      const chat = createChat({
+        webhookUrl:
+          "https://thesysdev.app.n8n.cloud/webhook/6f7d2bd5-381e-4756-8e1d-5eaabcb81cf3/chat",
+        agentName: "Test Bot",
+        theme: { mode: "light" },
+        mode: "sidepanel", // Options: "fullscreen" (default) | "sidepanel"
+        enableStreaming: true, // Toggle between true/false to test streaming
+        webhookConfig: {
+          method: "POST", // Default: "POST"
+          headers: {
+            // Add custom headers here if needed
+            // "Authorization": "Bearer token",
+            // "X-Custom-Header": "value"
+          },
+        },
+        onSessionStart: (sessionId) => {
+          console.log("Chat session started:", sessionId);
+        },
+      });
+
+      // Expose to window for testing
+      window.chat = chat;
+
+      console.log("Chat widget loaded!");
+      console.log("Mode:", "sidepanel");
+      console.log("Streaming mode:", true ? "enabled" : "disabled");
+      console.log(
+        "Available methods: chat.open(), chat.close(), chat.getSessionId(), chat.destroy()"
+      );
+    </script>
+  </body>
+</html>
