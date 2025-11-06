@@ -7,6 +7,8 @@ An embeddable chat widget that connects to your n8n workflows. Create beautiful 
 - 🎨 **Beautiful UI** - Clean, fullscreen chat interface
 - 🚀 **Easy Integration** - Single script tag or npm package
 - 💬 **Session Management** - Automatic session handling via C1Chat
+- 💾 **Persistence** - Optional localStorage support for chat history
+- 🗂️ **Thread Management** - Create, switch, and delete conversation threads
 - 🌓 **Theme Support** - Light and dark mode
 - 📱 **Responsive** - Works perfectly on mobile and desktop
 - 🖥️ **Fullscreen Mode** - Immersive chat experience
@@ -79,6 +81,20 @@ interface ChatConfig {
 
   // Optional: Enable streaming responses (default: false)
   enableStreaming?: boolean;
+
+  // Optional: Storage type for persisting chat history (default: "none")
+  // - "none": In-memory only (lost on page refresh)
+  // - "localstorage": Persist to browser localStorage (survives refresh)
+  storageType?: "none" | "localstorage";
+
+  // Optional: Display mode (default: "fullscreen")
+  mode?: "fullscreen" | "sidepanel";
+
+  // Optional: Custom webhook configuration
+  webhookConfig?: {
+    method?: string;
+    headers?: Record<string, string>;
+  };
 }
 ```
 
@@ -108,6 +124,7 @@ const chat = createChat({
   agentName: 'Sales Assistant',
   theme: { mode: 'dark' },
   enableStreaming: false,
+  storageType: 'localstorage', // Enable persistence
 
   // Track when sessions start
   onSessionStart: (sessionId) => {
@@ -116,6 +133,38 @@ const chat = createChat({
   }
 });
 ```
+
+### Persistence and Thread Management
+
+Enable localStorage persistence to save chat history across browser sessions:
+
+```javascript
+const chat = createChat({
+  webhookUrl: 'https://your-n8n-instance.com/webhook/xxx/chat',
+  storageType: 'localstorage', // Enable persistence
+});
+```
+
+**Storage Behavior:**
+
+With `storageType: "none"` (default):
+- ✅ Messages work normally during the session
+- ✅ Users can create multiple threads
+- ✅ Thread list UI appears in the sidebar
+- ❌ All data is lost on page refresh
+
+With `storageType: "localstorage"`:
+- ✅ Chat conversations are saved to browser localStorage
+- ✅ Users can create multiple conversation threads
+- ✅ Thread history persists across page refreshes
+- ✅ Thread list UI appears in the sidebar
+- ✅ Users can switch between threads and delete old ones
+
+**Storage Keys (localStorage only):**
+- `n8n-chat:threads` - Stores the list of thread metadata
+- `n8n-chat:thread:{threadId}` - Stores messages for each thread
+
+**Note:** The abstracted storage layer allows for easy future integration with other backends (Firebase, IndexedDB, etc.) by implementing the `StorageAdapter` interface.
 
 ## n8n Workflow Setup
 

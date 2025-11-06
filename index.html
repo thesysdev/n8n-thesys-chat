@@ -15,8 +15,9 @@
           "https://thesysdev.app.n8n.cloud/webhook/6f7d2bd5-381e-4756-8e1d-5eaabcb81cf3/chat",
         agentName: "Test Bot",
         theme: { mode: "light" },
-        mode: "sidepanel", // Options: "fullscreen" (default) | "sidepanel"
+          mode: "fullscreen", // Options: "fullscreen" (default) | "sidepanel"
         enableStreaming: true, // Toggle between true/false to test streaming
+          storageType: "localstorage", // Options: "none" (default) | "localstorage"
         webhookConfig: {
           method: "POST", // Default: "POST"
           headers: {
@@ -31,14 +32,7 @@
       });
 
       // Expose to window for testing
-      window.chat = chat;
-
-      console.log("Chat widget loaded!");
-      console.log("Mode:", "sidepanel");
-      console.log("Streaming mode:", true ? "enabled" : "disabled");
-      console.log(
-        "Available methods: chat.open(), chat.close(), chat.getSessionId(), chat.destroy()"
-      );
+            window.chat = chat;
     </script>
   </body>
 </html>

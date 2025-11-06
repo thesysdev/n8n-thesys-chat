@@ -1,4 +1,9 @@
 /**
+ * Storage type for persisting chat data
+ */
+export type StorageType = "none" | "localstorage";
+
+/**
  * Configuration options for the chat widget
  */
 export interface ChatConfig {
@@ -27,6 +32,11 @@ export interface ChatConfig {
   agentName?: string;
 
   /**
+   * URL to the logo image to display in the chat
+   */
+  logoUrl?: string;
+
+  /**
    * Enable streaming responses from n8n webhook
    * @default false
    */
@@ -48,6 +58,20 @@ export interface ChatConfig {
     method?: string;
     headers?: Record<string, string>;
   };
+
+  /**
+   * Storage type for persisting threads and messages
+   * - "none": No persistence (default)
+   * - "localstorage": Persist to browser localStorage
+   * @default "none"
+   */
+  storageType?: StorageType;
+
+  /**
+   * Enable debug logging to console
+   * @default false
+   */
+  enableDebugLogging?: boolean;
 }
 
 /**
@@ -105,3 +129,7 @@ export interface N8NError {
   message: string;
   status?: number;
 }
+
+// Re-export types for convenience
+export type { Message } from "@thesysai/genui-sdk";
+export type { Thread } from "@crayonai/react-core";
