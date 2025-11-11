@@ -3,7 +3,7 @@ import type { Thread } from "@crayonai/react-core";
 import type { StorageAdapter } from "./StorageAdapter";
 import { logError } from "../utils/logger";
 
-const STORAGE_PREFIX = "n8n-chat:";
+const STORAGE_PREFIX = "thesys-chat:";
 const THREADS_KEY = `${STORAGE_PREFIX}threads`;
 
 /**

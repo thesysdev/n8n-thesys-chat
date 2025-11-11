@@ -35,7 +35,7 @@
 1. **Make sure package name is available** (or update in package.json):
 
    ```bash
-   npm search thesys/n8n-chat
+   npm search thesysai/chat-client
    ```
 
 2. **Publish to npm**:
@@ -44,10 +44,10 @@
    npm publish --access public
    ```
 
-   Note: The `--access public` flag is required for scoped packages (@thesys/n8n-chat)
+   Note: The `--access public` flag is required for scoped packages (@thesysai/chat-client)
 
 3. **Verify the package**:
-   - Visit: https://www.npmjs.com/package/thesys/n8n-chat
+   - Visit: https://www.npmjs.com/package/thesysai/chat-client
    - Check files are correct
 
 ## Using via CDN
@@ -56,10 +56,10 @@ After publishing, the package will be automatically available on jsDelivr:
 
 ```html
 <script type="module">
-  import { createChat } from "https://cdn.jsdelivr.net/npm/thesys/n8n-chat/dist/chat.bundle.es.js";
+  import { createChat } from "https://cdn.jsdelivr.net/npm/thesysai/chat-client/dist/chat.bundle.es.js";
 
   createChat({
-    webhookUrl: "YOUR_N8N_WEBHOOK_URL",
+    webhookUrl: "YOUR_WEBHOOK_URL",
   });
 </script>
 ```
@@ -91,13 +91,13 @@ npm publish --access public
 You can unpublish within 72 hours of publishing:
 
 ```bash
-npm unpublish thesys/n8n-chat@<version>
+npm unpublish thesysai/chat-client@<version>
 ```
 
 Note: Unpublishing is discouraged. Use `npm deprecate` instead:
 
 ```bash
-npm deprecate thesys/n8n-chat@<version> "reason for deprecation"
+npm deprecate thesysai/chat-client@<version> "reason for deprecation"
 ```
 
 ## Testing Before Publishing
@@ -117,14 +117,14 @@ npm deprecate thesys/n8n-chat@<version> "reason for deprecation"
 3. **Test installation** in another project:
 
    ```bash
-   npm install /path/to/thesys-n8n-chat-0.1.0.tgz
+   npm install /path/to/thesysai-chat-client-0.1.0.tgz
    ```
 
 4. **Verify it works** in the test project
 
 5. **Clean up**:
    ```bash
-   rm thesys-n8n-chat-0.1.0.tgz
+   rm thesysai-chat-client-0.1.0.tgz
    ```
 
 ## Continuous Integration

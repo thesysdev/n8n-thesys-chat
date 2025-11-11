@@ -4,13 +4,39 @@
 export type StorageType = "none" | "localstorage";
 
 /**
+ * n8n/webhook specific configuration
+ */
+export interface N8NConfig {
+  /**
+   * The webhook URL to send chat messages to
+   * Supports n8n, Make.com, Zapier, or custom webhook endpoints
+   */
+  webhookUrl: string;
+
+  /**
+   * Enable streaming responses from webhook
+   * @default false
+   */
+  enableStreaming?: boolean;
+
+  /**
+   * Configuration for the webhook request
+   * @default { method: 'POST', headers: {} }
+   */
+  webhookConfig?: {
+    method?: string;
+    headers?: Record<string, string>;
+  };
+}
+
+/**
  * Configuration options for the chat widget
  */
 export interface ChatConfig {
   /**
-   * The n8n webhook URL to send chat messages to
+   * n8n webhook configuration
    */
-  webhookUrl: string;
+  n8n: N8NConfig;
 
   /**
    * Callback fired when a session starts
@@ -37,27 +63,12 @@ export interface ChatConfig {
   logoUrl?: string;
 
   /**
-   * Enable streaming responses from n8n webhook
-   * @default false
-   */
-  enableStreaming?: boolean;
-
-  /**
    * Display mode for the chat widget
    * - "fullscreen": Takes up the entire viewport
    * - "sidepanel": Appears as a side panel on the right
    * @default "fullscreen"
    */
   mode?: "fullscreen" | "sidepanel";
-
-  /**
-   * Configuration for the webhook request
-   * @default { method: 'POST', headers: {} }
-   */
-  webhookConfig?: {
-    method?: string;
-    headers?: Record<string, string>;
-  };
 
   /**
    * Storage type for persisting threads and messages
@@ -100,35 +111,48 @@ export interface ChatInstance {
 }
 
 /**
- * Message format sent to n8n webhook
+ * Message format sent to webhook
+ * This is the default format, but can be customized for different providers
  */
-export interface N8NMessage {
+export interface WebhookMessage {
   chatInput: string;
   sessionId: string;
 }
 
 /**
- * Response format from n8n webhook (non-streaming)
+ * Response format from webhook (non-streaming)
+ * Most providers (n8n, Make.com, Zapier) return this format
  */
-export interface N8NResponse {
+export interface WebhookResponse {
   output: string;
 }
 
 /**
- * Streaming response item from n8n
+ * Streaming response item format
+ * Used by n8n and other providers that support line-delimited JSON streaming
  */
-export interface N8NStreamItem {
+export interface WebhookStreamItem {
   type: "item";
   content: string;
 }
 
 /**
- * Error from n8n webhook
+ * Error from webhook
  */
-export interface N8NError {
+export interface WebhookError {
   message: string;
   status?: number;
 }
+
+// Legacy aliases for backward compatibility
+/** @deprecated Use WebhookMessage instead */
+export type N8NMessage = WebhookMessage;
+/** @deprecated Use WebhookResponse instead */
+export type N8NResponse = WebhookResponse;
+/** @deprecated Use WebhookStreamItem instead */
+export type N8NStreamItem = WebhookStreamItem;
+/** @deprecated Use WebhookError instead */
+export type N8NError = WebhookError;
 
 // Re-export types for convenience
 export type { Message } from "@thesysai/genui-sdk";

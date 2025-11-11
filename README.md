@@ -1,183 +1,106 @@
-# Thesys Chat Widget for n8n
+# Thesys Chat Client
 
-An embeddable chat widget that connects to your n8n workflows. Create beautiful chat interfaces powered by your custom n8n automations.
+An embeddable chat widget that connects to webhook endpoints. Create beautiful chat interfaces powered by your custom workflows from n8n, Make.com, or any custom webhook provider.
 
 ## Features
 
 - 🎨 **Beautiful UI** - Clean, fullscreen chat interface
 - 🚀 **Easy Integration** - Single script tag or npm package
-- 💬 **Session Management** - Automatic session handling via C1Chat
+- 💬 **Session Management** - Automatic session handling
 - 💾 **Persistence** - Optional localStorage support for chat history
 - 🗂️ **Thread Management** - Create, switch, and delete conversation threads
 - 🌓 **Theme Support** - Light and dark mode
 - 📱 **Responsive** - Works perfectly on mobile and desktop
-- 🖥️ **Fullscreen Mode** - Immersive chat experience
+- 🔌 **Provider Agnostic** - Works with n8n, Make.com, or custom webhooks
 
-## Installation
-
-### Option 1: CDN (Recommended for quick setup)
+## Quick Start
 
 Add this script to your HTML:
 
 ```html
 <script type="module">
-  import { createChat } from 'https://cdn.jsdelivr.net/npm/thesys/n8n-chat/dist/chat.bundle.es.js';
+  import { createChat } from 'https://cdn.jsdelivr.net/npm/thesysai/chat-client/dist/chat.bundle.es.js';
 
   createChat({
-    webhookUrl: 'YOUR_PRODUCTION_WEBHOOK_URL',
+    n8n: {
+      webhookUrl: 'YOUR_WEBHOOK_URL'
+    },
     agentName: 'Assistant'
   });
 </script>
 ```
 
-### Option 2: npm Package
+## Installation
+
+### CDN (Recommended)
+
+See Quick Start above.
+
+### npm Package
 
 ```bash
-npm install thesys/n8n-chat
+npm install thesysai/chat-client
 ```
 
 ```javascript
-import { createChat } from 'thesys/n8n-chat';
+import { createChat } from 'thesysai/chat-client';
 
 const chat = createChat({
-  webhookUrl: 'YOUR_PRODUCTION_WEBHOOK_URL'
+  n8n: {
+    webhookUrl: 'YOUR_WEBHOOK_URL'
+  }
 });
 ```
 
-## Usage
+## Configuration
 
-### Basic Setup
+```javascript
+const chat = createChat({
+  // Required: Webhook configuration
+  n8n: {
+    webhookUrl: 'https://your-webhook-endpoint.com/chat',
+    enableStreaming: false  // Optional: Enable streaming responses
+  },
 
-```html
-<script type="module">
-  import { createChat } from 'https://cdn.jsdelivr.net/npm/thesys/n8n-chat/dist/chat.bundle.es.js';
-
-  const chat = createChat({
-    webhookUrl: 'https://your-n8n-instance.com/webhook/xxx/chat',
-    agentName: 'Support Bot',
-    theme: { mode: 'light' }
-  });
-</script>
-```
-
-### Configuration Options
-
-```typescript
-interface ChatConfig {
-  // Required: Your n8n webhook URL
-  webhookUrl: string;
+  // Optional settings
+  agentName: 'Assistant',           // Bot/agent name
+  theme: { mode: 'light' },         // 'light' or 'dark'
+  storageType: 'localstorage',      // 'none' or 'localstorage'
+  mode: 'fullscreen',               // 'fullscreen' or 'sidepanel'
 
   // Optional: Callback when session starts
-  // The sessionId is managed by C1Chat and passed as threadId
-  onSessionStart?: (sessionId: string) => void;
-
-  // Optional: Theme configuration
-  theme?: {
-    mode: 'light' | 'dark';
-  };
-
-  // Optional: Bot/agent name (default: "Assistant")
-  agentName?: string;
-
-  // Optional: Enable streaming responses (default: false)
-  enableStreaming?: boolean;
-
-  // Optional: Storage type for persisting chat history (default: "none")
-  // - "none": In-memory only (lost on page refresh)
-  // - "localstorage": Persist to browser localStorage (survives refresh)
-  storageType?: "none" | "localstorage";
-
-  // Optional: Display mode (default: "fullscreen")
-  mode?: "fullscreen" | "sidepanel";
-
-  // Optional: Custom webhook configuration
-  webhookConfig?: {
-    method?: string;
-    headers?: Record<string, string>;
-  };
-}
+  onSessionStart: (sessionId) => {
+    console.log('Session started:', sessionId);
+  }
+});
 ```
+
+### Storage Options
+
+**`storageType: "none"` (default):**
+- Messages work normally during the session
+- All data is lost on page refresh
+
+**`storageType: "localstorage"`:**
+- Chat conversations persist across page refreshes
+- Users can create and manage multiple threads
+- Thread history is saved to browser localStorage
 
 ### Programmatic Control
 
-The `createChat` function returns a `ChatInstance` with these methods:
-
 ```javascript
-const chat = createChat({ webhookUrl: '...' });
-
 // Get current session ID
 const sessionId = chat.getSessionId();
 
 // Destroy the widget completely
 chat.destroy();
-
-// Note: open() and close() have no effect in fullscreen mode
 ```
 
-### Advanced Example
+## Webhook Integration
 
-```javascript
-import { createChat } from 'thesys/n8n-chat';
+### Request Format
 
-const chat = createChat({
-  webhookUrl: 'https://your-n8n-instance.com/webhook/xxx/chat',
-  agentName: 'Sales Assistant',
-  theme: { mode: 'dark' },
-  enableStreaming: false,
-  storageType: 'localstorage', // Enable persistence
-
-  // Track when sessions start
-  onSessionStart: (sessionId) => {
-    console.log('Chat session started:', sessionId);
-    // Send to analytics, etc.
-  }
-});
-```
-
-### Persistence and Thread Management
-
-Enable localStorage persistence to save chat history across browser sessions:
-
-```javascript
-const chat = createChat({
-  webhookUrl: 'https://your-n8n-instance.com/webhook/xxx/chat',
-  storageType: 'localstorage', // Enable persistence
-});
-```
-
-**Storage Behavior:**
-
-With `storageType: "none"` (default):
-- ✅ Messages work normally during the session
-- ✅ Users can create multiple threads
-- ✅ Thread list UI appears in the sidebar
-- ❌ All data is lost on page refresh
-
-With `storageType: "localstorage"`:
-- ✅ Chat conversations are saved to browser localStorage
-- ✅ Users can create multiple conversation threads
-- ✅ Thread history persists across page refreshes
-- ✅ Thread list UI appears in the sidebar
-- ✅ Users can switch between threads and delete old ones
-
-**Storage Keys (localStorage only):**
-- `n8n-chat:threads` - Stores the list of thread metadata
-- `n8n-chat:thread:{threadId}` - Stores messages for each thread
-
-**Note:** The abstracted storage layer allows for easy future integration with other backends (Firebase, IndexedDB, etc.) by implementing the `StorageAdapter` interface.
-
-## n8n Workflow Setup
-
-### 1. Create a Webhook Trigger
-
-1. In n8n, create a new workflow
-2. Add a **Webhook** node as the trigger
-3. Set the webhook to accept POST requests
-4. Configure the webhook path (e.g., `/webhook/xxx/chat`)
-
-### 2. Process the Chat Input
-
-The widget sends messages in this format:
+The chat client sends POST requests to your webhook:
 
 ```json
 {
@@ -186,15 +109,9 @@ The widget sends messages in this format:
 }
 ```
 
-Access these in your workflow:
-- `{{ $json.chatInput }}` - The user's message
-- `{{ $json.sessionId }}` - The session ID for tracking conversations
+### Response Format
 
-### 3. Return a Response
-
-**For non-streaming mode:**
-
-Use the **Respond to Webhook** node to send a complete response:
+**Non-streaming mode:**
 
 ```json
 {
@@ -202,9 +119,9 @@ Use the **Respond to Webhook** node to send a complete response:
 }
 ```
 
-**For streaming mode (enableStreaming: true):**
+**Streaming mode (`enableStreaming: true`):**
 
-Your n8n workflow should return line-delimited JSON chunks in this format:
+Return line-delimited JSON chunks:
 
 ```
 { "type": "item", "content": "First chunk " }
@@ -212,71 +129,130 @@ Your n8n workflow should return line-delimited JSON chunks in this format:
 { "type": "item", "content": "final chunk" }
 ```
 
-Each line is a separate JSON object. The widget will automatically combine these chunks and display them as they arrive.
+## Provider Setup
 
-### 4. Configure CORS (Important!)
+### n8n
 
-In your Webhook node settings:
+1. **Create a Webhook Trigger**
+   - Add a Webhook node to your workflow
+   - Set it to accept POST requests
+   - Note your webhook URL
 
-1. Enable **Domain Allowlist**
-2. Add your domain(s): `example.com`, `www.example.com`
-3. For local development, add: `localhost`, `127.0.0.1`
+2. **Access the Data**
+   - Message: `{{ $json.chatInput }}`
+   - Session ID: `{{ $json.sessionId }}`
 
-**Security Note:** Since the webhook is called directly from the browser, your webhook URL will be visible to users. Use n8n's Domain Allowlist feature to restrict access to your domain only.
+3. **Return a Response**
+   - Use "Respond to Webhook" node
+   - Return: `{ "output": "Your response" }`
 
-## Example n8n Workflow
+4. **Configure CORS**
+   - Enable Domain Allowlist in webhook settings
+   - Add your domain(s): `example.com`, `www.example.com`
+   - For local dev: `localhost`, `127.0.0.1`
 
-Here's a simple workflow structure:
+**Security Note:** The webhook URL is visible in the browser. Use n8n's Domain Allowlist to restrict access.
 
-```
-Webhook (Trigger)
-  ↓
-[Process chatInput with AI/Logic]
-  ↓
-Respond to Webhook
-```
+### Make.com
 
-Example nodes:
-1. **Webhook** - Receives `chatInput` and `sessionId`
-2. **OpenAI / HTTP Request / Function** - Process the message
-3. **Respond to Webhook** - Return `{ "output": "response" }`
+1. Create a scenario with a **Webhook** module
+2. Process `chatInput` and `sessionId`
+3. Add your logic (AI, database, etc.)
+4. Use **Webhook Response** to return `{ "output": "Your response" }`
 
-## Development
+### Custom Webhook
 
-### Local Development
+Your endpoint should:
+1. Accept POST requests with JSON body
+2. Parse `chatInput` and `sessionId`
+3. Return JSON: `{ "output": "Your response" }`
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+For streaming, return line-delimited JSON chunks.
 
-3. Start the dev server:
-   ```bash
-   npm run dev
-   ```
+## Configuration Reference
 
-4. Open http://localhost:3000 to see the test page
+Complete list of all available options:
 
-5. Update the `webhookUrl` in `index.html` with your n8n webhook URL
+### n8n (required)
 
-### Building for Production
+```typescript
+n8n: {
+  // Required: Your webhook URL
+  webhookUrl: string;
 
-```bash
-npm run build
-```
+  // Optional: Enable streaming responses (default: false)
+  enableStreaming?: boolean;
 
-This creates:
-- `dist/chat.bundle.es.js` - The widget bundle
-- `dist/index.d.ts` - TypeScript definitions
-
-### Testing the Build
-
-```bash
-npm run preview
+  // Optional: Custom webhook configuration
+  webhookConfig?: {
+    method?: string;                    // HTTP method (default: "POST")
+    headers?: Record<string, string>;   // Custom headers
+  };
+}
 ```
 
-This serves the built files locally so you can test the production bundle.
+### agentName (optional)
+
+```typescript
+agentName?: string;  // Default: "Assistant"
+```
+
+The name displayed for the bot/agent in the chat interface.
+
+### theme (optional)
+
+```typescript
+theme?: {
+  mode: 'light' | 'dark';  // Default: 'light'
+}
+```
+
+Sets the color scheme for the chat interface.
+
+### storageType (optional)
+
+```typescript
+storageType?: 'none' | 'localstorage';  // Default: 'none'
+```
+
+Controls chat history persistence:
+- `'none'` - Messages are kept in memory only, lost on page refresh
+- `'localstorage'` - Messages are saved to browser localStorage, persist across sessions
+
+### mode (optional)
+
+```typescript
+mode?: 'fullscreen' | 'sidepanel';  // Default: 'fullscreen'
+```
+
+Controls the display mode:
+- `'fullscreen'` - Takes up the entire viewport
+- `'sidepanel'` - Displays as a side panel (widget style)
+
+### onSessionStart (optional)
+
+```typescript
+onSessionStart?: (sessionId: string) => void;
+```
+
+Callback function that fires when a new chat session is created. Receives the session ID as a parameter. Useful for analytics or tracking.
+
+## Troubleshooting
+
+### Chat doesn't load
+- Check browser console for errors
+- Verify webhook URL is correct
+- Ensure webhook endpoint is active and accessible
+- Check CORS settings
+
+### "Unable to reach the webhook" error
+- Verify webhook URL is correct
+- Check CORS configuration
+- Ensure your domain is allowlisted (for n8n)
+
+### Messages not sending
+- Verify response format: `{ "output": "message" }`
+- Check webhook execution logs
 
 ## Browser Support
 
@@ -285,39 +261,14 @@ This serves the built files locally so you can test the production bundle.
 - Safari (latest 2 versions)
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
-## Troubleshooting
-
-### Chat doesn't load
-
-1. Check browser console for errors
-2. Verify the webhook URL is correct
-3. Ensure your n8n workflow is active
-4. Check CORS/Domain Allowlist settings
-5. Ensure the chat container has space (fullscreen mode)
-
-### "Unable to reach the webhook" error
-
-This usually means:
-1. The webhook URL is incorrect
-2. Your n8n instance is not accessible
-3. CORS is not configured properly
-4. Your domain is not in the Domain Allowlist
-
-### Messages not sending
-
-1. Check that your workflow returns a response using "Respond to Webhook"
-2. Verify the response format: `{ "output": "message" }`
-3. Check n8n execution logs for errors
-
 ## License
 
 MIT
 
 ## Support
 
-For issues and questions:
-- GitHub Issues: [Create an issue](https://github.com/thesysdev/n8n-thesys-chat/issues)
-- Documentation: [View docs](https://github.com/thesysdev/n8n-thesys-chat)
+- GitHub Issues: [Create an issue](https://github.com/thesysai/chat-client/issues)
+- Documentation: [View docs](https://github.com/thesysai/chat-client)
 
 ## Contributing
 

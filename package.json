@@ -1,7 +1,7 @@
 {
-  "name": "thesys/n8n-chat",
+  "name": "thesysai/chat-client",
   "version": "0.1.0",
-  "description": "Embeddable chat widget for n8n workflows",
+  "description": "Embeddable chat client for webhooks and workflow providers",
   "main": "./dist/chat.bundle.es.js",
   "module": "./dist/chat.bundle.es.js",
   "types": "./dist/index.d.ts",

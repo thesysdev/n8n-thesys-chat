@@ -1,9 +1,9 @@
 /**
- * Window namespace for n8n chat configuration
+ * Window namespace for chat configuration
  */
 declare global {
   interface Window {
-    __N8N_CHAT__?: {
+    __THESYS_CHAT__?: {
       enableDebugLogging?: boolean;
     };
   }
@@ -13,7 +13,7 @@ declare global {
  * Check if debug logging is enabled
  */
 function isDebugEnabled(): boolean {
-  return window.__N8N_CHAT__?.enableDebugLogging === true;
+  return window.__THESYS_CHAT__?.enableDebugLogging === true;
 }
 
 /**

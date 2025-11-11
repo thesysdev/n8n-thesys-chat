@@ -8,7 +8,7 @@ import {
 } from "@thesysai/genui-sdk";
 import type { Thread, UserMessage } from "@crayonai/react-core";
 import "@crayonai/react-ui/styles/index.css";
-import type { ChatConfig, ChatInstance, N8NMessage } from "./types";
+import type { ChatConfig, ChatInstance, WebhookMessage } from "./types";
 import { createStorageAdapter } from "./storage";
 import type { StorageAdapter } from "./storage";
 import { log, logError } from "./utils/logger";
@@ -27,29 +27,28 @@ function generateThreadTitle(message: string): string {
 }
 
 /**
- * Helper function to call n8n webhook
+ * Helper function to call webhook endpoint
+ * Supports n8n, Make.com, Zapier, and custom webhook providers
  */
-async function callN8NWebhook(
-  webhookUrl: string,
+async function callWebhook(
+  n8nConfig: ChatConfig["n8n"],
   sessionId: string,
-  prompt: string,
-  enableStreaming: boolean,
-  webhookConfig?: ChatConfig["webhookConfig"]
+  prompt: string
 ): Promise<Response> {
-  const message: N8NMessage = {
+  const message: WebhookMessage = {
     chatInput: prompt,
     sessionId: sessionId,
   };
 
-  const webhookMethod = webhookConfig?.method || "POST";
-  const customHeaders = webhookConfig?.headers || {};
+  const webhookMethod = n8nConfig.webhookConfig?.method || "POST";
+  const customHeaders = n8nConfig.webhookConfig?.headers || {};
 
   const headers = {
     "Content-Type": "application/json",
     ...customHeaders,
   };
 
-  const response = await fetch(webhookUrl, {
+  const response = await fetch(n8nConfig.webhookUrl, {
     method: webhookMethod,
     headers: headers,
     body: JSON.stringify(message),
@@ -60,12 +59,12 @@ async function callN8NWebhook(
   }
 
   // For non-streaming, get JSON and return as text
-  if (!enableStreaming) {
+  if (!n8nConfig.enableStreaming) {
     const data = await response.json();
     return new Response(data.output || data.message || JSON.stringify(data));
   }
 
-  // For streaming, transform n8n format to plain text stream
+  // For streaming, transform line-delimited JSON format to plain text stream
   if (!response.body) {
     throw new Error("Response body is null");
   }
@@ -224,13 +223,7 @@ function ChatWithPersistence({
       const prompt = lastMessage?.content || "";
 
       // Call webhook
-      const response = await callN8NWebhook(
-        config.webhookUrl,
-        threadId,
-        prompt,
-        config.enableStreaming || false,
-        config.webhookConfig
-      );
+      const response = await callWebhook(config.n8n, threadId, prompt);
 
       // Wrap stream to save assistant message when complete
       if (response.body) {
@@ -300,10 +293,12 @@ function ChatWithPersistence({
  *
  * @example
  * ```typescript
- * import { createChat } from 'thesys/n8n-chat';
+ * import { createChat } from 'thesysai/chat-client';
  *
  * const chat = createChat({
- *   webhookUrl: 'https://your-n8n-instance.com/webhook/xxx',
+ *   n8n: {
+ *     webhookUrl: 'https://your-webhook-endpoint.com/chat'
+ *   },
  *   agentName: 'My Bot',
  *   storageType: 'localstorage'
  * });
@@ -311,15 +306,16 @@ function ChatWithPersistence({
  */
 export function createChat(config: ChatConfig): ChatInstance {
   // Validate required config
-  if (!config.webhookUrl) {
-    throw new Error("webhookUrl is required");
+  if (!config.n8n?.webhookUrl) {
+    throw new Error("n8n.webhookUrl is required");
   }
 
   // Set debug logging flag at window level
-  if (!window.__N8N_CHAT__) {
-    window.__N8N_CHAT__ = {};
+  if (!window.__THESYS_CHAT__) {
+    window.__THESYS_CHAT__ = {};
   }
-  window.__N8N_CHAT__.enableDebugLogging = config.enableDebugLogging || false;
+  window.__THESYS_CHAT__.enableDebugLogging =
+    config.enableDebugLogging || false;
 
   // Create storage adapter
   const storageType = config.storageType || "none";
@@ -369,4 +365,4 @@ export function createChat(config: ChatConfig): ChatInstance {
 }
 
 // Export types
-export type { ChatConfig, ChatInstance } from "./types";
+export type { ChatConfig, ChatInstance, N8NConfig } from "./types";
