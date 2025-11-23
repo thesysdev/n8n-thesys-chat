@@ -9,38 +9,23 @@
     <script type="module">
       import { createChat } from "/src/index.ts";
 
-      // Create the chat widget
-                            // NOTE: Replace webhookUrl with your actual webhook endpoint
-                            // Examples:
-                            //   - n8n: https://your-n8n-instance.com/webhook/xxx/chat
-                            //   - Make.com: https://hook.make.com/xxx
-                            //   - Zapier: https://hooks.zapier.com/hooks/catch/xxx
-                            //   - Custom: https://your-api.com/webhook/chat
       const chat = createChat({
-          n8n: {
-              webhookUrl:
-                  "https://thesysdev.app.n8n.cloud/webhook/6f7d2bd5-381e-4756-8e1d-5eaabcb81cf3/chat",
-              enableStreaming: true, // Toggle between true/false to test streaming
-              webhookConfig: {
-                  method: "POST", // Default: "POST"
-                  headers: {
-                      // Add custom headers here if needed
-                      // "Authorization": "Bearer token",
-                      // "X-Custom-Header": "value"
-                  },
-              },
-          },
+        webhookUrl:
+          "http://localhost:5678/webhook/3b68ad97-4a2a-4d9d-94ad-70a9b72f848a/chat",
+        enableStreaming: true,
+        thesysGenUISDK: {
           agentName: "Test Bot",
           theme: { mode: "light" },
           mode: "fullscreen", // Options: "fullscreen" (default) | "sidepanel"
           storageType: "localstorage", // Options: "none" (default) | "localstorage"
-        onSessionStart: (sessionId) => {
-          console.log("Chat session started:", sessionId);
+          onSessionStart: (sessionId) => {
+            console.log("Chat session started:", sessionId);
+          },
         },
       });
 
       // Expose to window for testing
-                            window.chat = chat;
+      window.chat = chat;
     </script>
   </body>
 </html>

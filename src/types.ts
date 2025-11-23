@@ -29,15 +29,7 @@ export interface N8NConfig {
   };
 }
 
-/**
- * Configuration options for the chat widget
- */
-export interface ChatConfig {
-  /**
-   * n8n webhook configuration
-   */
-  n8n: N8NConfig;
-
+export interface ThesysGenUISDKConfig {
   /**
    * Callback fired when a session starts
    * The sessionId is the threadId from C1Chat
@@ -83,6 +75,13 @@ export interface ChatConfig {
    * @default false
    */
   enableDebugLogging?: boolean;
+}
+
+/**
+ * Configuration options for the chat widget
+ */
+export interface ChatConfig extends N8NConfig {
+  thesysGenUISDK: ThesysGenUISDKConfig;
 }
 
 /**
