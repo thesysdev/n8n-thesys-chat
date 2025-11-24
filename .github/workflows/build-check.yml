@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository == 'thesysdev/chat-client'
+    if: github.repository == 'thesysdev/genui-widget'
 
     env:
       THESYS_API_KEY: dummy-api-key-for-testing
