@@ -8,7 +8,12 @@ import {
 } from "@thesysai/genui-sdk";
 import type { Thread, UserMessage } from "@crayonai/react-core";
 import "@crayonai/react-ui/styles/index.css";
-import type { ChatConfig, ChatInstance, WebhookMessage } from "./types";
+import type {
+  ChatConfig,
+  ChatInstance,
+  N8NConfig,
+  WebhookMessage,
+} from "./types";
 import { createStorageAdapter } from "./storage";
 import type { StorageAdapter } from "./storage";
 import { log, logError } from "./utils/logger";
@@ -31,7 +36,7 @@ function generateThreadTitle(message: string): string {
  * Supports n8n, Make.com, Zapier, and custom webhook providers
  */
 async function callWebhook(
-  n8nConfig: ChatConfig["n8n"],
+  n8nConfig: N8NConfig,
   sessionId: string,
   prompt: string
 ): Promise<Response> {
@@ -58,10 +63,33 @@ async function callWebhook(
     throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
   }
 
-  // For non-streaming, get JSON and return as text
-  if (!n8nConfig.enableStreaming) {
-    const data = await response.json();
+  // Always try to parse as JSON first, regardless of streaming config
+  // This handles cases where backend sends JSON even when streaming is expected
+  const clonedResponse = response.clone();
+  try {
+    const data = await clonedResponse.json();
+    // Successfully parsed JSON - return it (backend sent JSON, not a stream)
     return new Response(data.output || data.message || JSON.stringify(data));
+  } catch (error) {
+    // JSON parsing failed - might be a stream
+    // Check if streaming is enabled or Content-Type suggests streaming
+    const contentType = response.headers.get("Content-Type") || "";
+    const isStreaming =
+      n8nConfig.enableStreaming ||
+      contentType.includes("text/event-stream") ||
+      contentType.includes("application/x-ndjson");
+
+    if (!isStreaming) {
+      // Not configured for streaming and JSON parsing failed
+      if (!response.body) {
+        throw new Error(
+          `Failed to parse response as JSON and no body available: ${error}`
+        );
+      }
+      // Even if not explicitly streaming, try to handle as stream as fallback
+      log("JSON parsing failed, attempting to handle as stream");
+    }
+    // Continue to streaming handling below
   }
 
   // For streaming, transform line-delimited JSON format to plain text stream
@@ -140,7 +168,8 @@ function ChatWithPersistence({
   storage: StorageAdapter;
   onSessionIdChange: (sessionId: string | null) => void;
 }) {
-  const formFactor = config.mode === "sidepanel" ? "side-panel" : "full-page";
+  const formFactor =
+    config.thesysGenUISDK.mode === "sidepanel" ? "side-panel" : "full-page";
 
   // Initialize thread list manager
   const threadListManager = useThreadListManager({
@@ -211,7 +240,7 @@ function ChatWithPersistence({
 
       // Call onSessionStart on first message
       if (messages.length === 1) {
-        config.onSessionStart?.(threadId);
+        config.thesysGenUISDK.onSessionStart?.(threadId);
       }
 
       // Save user messages
@@ -223,7 +252,7 @@ function ChatWithPersistence({
       const prompt = lastMessage?.content || "";
 
       // Call webhook
-      const response = await callWebhook(config.n8n, threadId, prompt);
+      const response = await callWebhook(config, threadId, prompt);
 
       // Wrap stream to save assistant message when complete
       if (response.body) {
@@ -278,9 +307,9 @@ function ChatWithPersistence({
   return createElement(C1Chat, {
     threadManager,
     threadListManager,
-    theme: config.theme,
-    agentName: config.agentName || "Assistant",
-    logoUrl: config.logoUrl,
+    theme: config.thesysGenUISDK.theme,
+    agentName: config.thesysGenUISDK.agentName || "Assistant",
+    logoUrl: config.thesysGenUISDK.logoUrl,
     formFactor,
   });
 }
@@ -296,9 +325,7 @@ function ChatWithPersistence({
  * import { createChat } from 'thesysai/chat-client';
  *
  * const chat = createChat({
- *   n8n: {
- *     webhookUrl: 'https://your-webhook-endpoint.com/chat'
- *   },
+ *   webhookUrl: 'https://your-webhook-endpoint.com/chat',
  *   agentName: 'My Bot',
  *   storageType: 'localstorage'
  * });
@@ -306,7 +333,7 @@ function ChatWithPersistence({
  */
 export function createChat(config: ChatConfig): ChatInstance {
   // Validate required config
-  if (!config.n8n?.webhookUrl) {
+  if (!config.webhookUrl) {
     throw new Error("n8n.webhookUrl is required");
   }
 
@@ -315,10 +342,10 @@ export function createChat(config: ChatConfig): ChatInstance {
     window.__THESYS_CHAT__ = {};
   }
   window.__THESYS_CHAT__.enableDebugLogging =
-    config.enableDebugLogging || false;
+    config.thesysGenUISDK.enableDebugLogging || false;
 
   // Create storage adapter
-  const storageType = config.storageType || "none";
+  const storageType = config.thesysGenUISDK.storageType || "none";
   const storage = createStorageAdapter(storageType);
 
   // Create container element
