@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thesys Chat Client Test</title>
+  </head>
+  <body>
+    <script type="module">
+      import { createChat } from "/src/index.ts";
+
+      const chat = createChat({
+        webhookUrl:
+          "http://localhost:5678/webhook/3b68ad97-4a2a-4d9d-94ad-70a9b72f848a/chat",
+        enableStreaming: true,
+        thesysGenUISDK: {
+          agentName: "Test Bot",
+          theme: { mode: "light" },
+          mode: "fullscreen", // Options: "fullscreen" (default) | "sidepanel"
+          storageType: "localstorage", // Options: "none" (default) | "localstorage"
+          onSessionStart: (sessionId) => {
+            console.log("Chat session started:", sessionId);
+          },
+        },
+      });
+
+      // Expose to window for testing
+      window.chat = chat;
+    </script>
+  </body>
+</html>

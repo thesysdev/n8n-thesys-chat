@@ -1,0 +1,158 @@
+/**
+ * Storage type for persisting chat data
+ */
+export type StorageType = "none" | "localstorage";
+
+/**
+ * n8n/webhook specific configuration
+ */
+export interface N8NConfig {
+  /**
+   * The webhook URL to send chat messages to
+   * Supports n8n, Make.com, Zapier, or custom webhook endpoints
+   */
+  webhookUrl: string;
+
+  /**
+   * Enable streaming responses from webhook
+   * @default false
+   */
+  enableStreaming?: boolean;
+
+  /**
+   * Configuration for the webhook request
+   * @default { method: 'POST', headers: {} }
+   */
+  webhookConfig?: {
+    method?: string;
+    headers?: Record<string, string>;
+  };
+}
+
+export interface ThesysGenUISDKConfig {
+  /**
+   * Callback fired when a session starts
+   * The sessionId is the threadId from C1Chat
+   */
+  onSessionStart?: (sessionId: string) => void;
+
+  /**
+   * Theme configuration
+   */
+  theme?: {
+    mode: "light" | "dark";
+  };
+
+  /**
+   * Name of the agent/bot
+   * @default "Assistant"
+   */
+  agentName?: string;
+
+  /**
+   * URL to the logo image to display in the chat
+   */
+  logoUrl?: string;
+
+  /**
+   * Display mode for the chat widget
+   * - "fullscreen": Takes up the entire viewport
+   * - "sidepanel": Appears as a side panel on the right
+   * @default "fullscreen"
+   */
+  mode?: "fullscreen" | "sidepanel";
+
+  /**
+   * Storage type for persisting threads and messages
+   * - "none": No persistence (default)
+   * - "localstorage": Persist to browser localStorage
+   * @default "none"
+   */
+  storageType?: StorageType;
+
+  /**
+   * Enable debug logging to console
+   * @default false
+   */
+  enableDebugLogging?: boolean;
+}
+
+/**
+ * Configuration options for the chat widget
+ */
+export interface ChatConfig extends N8NConfig {
+  thesysGenUISDK: ThesysGenUISDKConfig;
+}
+
+/**
+ * Chat widget instance returned by createChat
+ */
+export interface ChatInstance {
+  /**
+   * Programmatically open the chat window
+   */
+  open: () => void;
+
+  /**
+   * Programmatically close the chat window
+   */
+  close: () => void;
+
+  /**
+   * Destroy the chat widget and remove it from the DOM
+   */
+  destroy: () => void;
+
+  /**
+   * Get the current session ID
+   */
+  getSessionId: () => string;
+}
+
+/**
+ * Message format sent to webhook
+ * This is the default format, but can be customized for different providers
+ */
+export interface WebhookMessage {
+  chatInput: string;
+  sessionId: string;
+}
+
+/**
+ * Response format from webhook (non-streaming)
+ * Most providers (n8n, Make.com, Zapier) return this format
+ */
+export interface WebhookResponse {
+  output: string;
+}
+
+/**
+ * Streaming response item format
+ * Used by n8n and other providers that support line-delimited JSON streaming
+ */
+export interface WebhookStreamItem {
+  type: "item";
+  content: string;
+}
+
+/**
+ * Error from webhook
+ */
+export interface WebhookError {
+  message: string;
+  status?: number;
+}
+
+// Legacy aliases for backward compatibility
+/** @deprecated Use WebhookMessage instead */
+export type N8NMessage = WebhookMessage;
+/** @deprecated Use WebhookResponse instead */
+export type N8NResponse = WebhookResponse;
+/** @deprecated Use WebhookStreamItem instead */
+export type N8NStreamItem = WebhookStreamItem;
+/** @deprecated Use WebhookError instead */
+export type N8NError = WebhookError;
+
+// Re-export types for convenience
+export type { Message } from "@thesysai/genui-sdk";
+export type { Thread } from "@crayonai/react-core";
