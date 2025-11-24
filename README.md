@@ -1,4 +1,4 @@
-# Thesys Chat Client
+# GenUI Widget
 
 An embeddable chat widget that connects to webhook endpoints. Create beautiful chat interfaces powered by your custom workflows from n8n, Make.com, or any custom webhook provider.
 
@@ -18,14 +18,19 @@ An embeddable chat widget that connects to webhook endpoints. Create beautiful c
 Add this script to your HTML:
 
 ```html
+<link
+  href="https://cdn.jsdelivr.net/npm/genui-widget/dist/genui-widget.css"
+  rel="stylesheet"
+/>
+
 <script type="module">
-  import { createChat } from 'https://cdn.jsdelivr.net/npm/thesysai/chat-client/dist/chat.bundle.es.js';
+  import { createChat } from "https://cdn.jsdelivr.net/npm/genui-widget/dist/genui-widget.es.js";
 
   createChat({
     n8n: {
-      webhookUrl: 'YOUR_WEBHOOK_URL'
+      webhookUrl: "YOUR_WEBHOOK_URL",
     },
-    agentName: 'Assistant'
+    agentName: "Assistant",
   });
 </script>
 ```
@@ -39,16 +44,22 @@ See Quick Start above.
 ### npm Package
 
 ```bash
-npm install thesysai/chat-client
+npm install genui-widget
+```
+
+**Note:** This package requires React 18 or 19 as peer dependencies. Make sure you have React installed in your project:
+
+```bash
+npm install react react-dom
 ```
 
 ```javascript
-import { createChat } from 'thesysai/chat-client';
+import { createChat } from "genui-widget";
 
 const chat = createChat({
   n8n: {
-    webhookUrl: 'YOUR_WEBHOOK_URL'
-  }
+    webhookUrl: "YOUR_WEBHOOK_URL",
+  },
 });
 ```
 
@@ -58,30 +69,34 @@ const chat = createChat({
 const chat = createChat({
   // Required: Webhook configuration
   n8n: {
-    webhookUrl: 'https://your-webhook-endpoint.com/chat',
-    enableStreaming: false  // Optional: Enable streaming responses
+    webhookUrl: "https://your-webhook-endpoint.com/chat",
+    enableStreaming: false, // Optional: Enable streaming responses
   },
 
   // Optional settings
-  agentName: 'Assistant',           // Bot/agent name
-  theme: { mode: 'light' },         // 'light' or 'dark'
-  storageType: 'localstorage',      // 'none' or 'localstorage'
-  mode: 'fullscreen',               // 'fullscreen' or 'sidepanel'
+  agentName: "Assistant", // Bot/agent name
+  logoUrl: "https://example.com/logo.png", // Logo image URL
+  theme: { mode: "light" }, // 'light' or 'dark'
+  storageType: "localstorage", // 'none' or 'localstorage'
+  mode: "fullscreen", // 'fullscreen' or 'sidepanel'
+  enableDebugLogging: false, // Enable console debug logging
 
   // Optional: Callback when session starts
   onSessionStart: (sessionId) => {
-    console.log('Session started:', sessionId);
-  }
+    console.log("Session started:", sessionId);
+  },
 });
 ```
 
 ### Storage Options
 
 **`storageType: "none"` (default):**
+
 - Messages work normally during the session
 - All data is lost on page refresh
 
 **`storageType: "localstorage"`:**
+
 - Chat conversations persist across page refreshes
 - Users can create and manage multiple threads
 - Thread history is saved to browser localStorage
@@ -91,6 +106,12 @@ const chat = createChat({
 ```javascript
 // Get current session ID
 const sessionId = chat.getSessionId();
+
+// Open the chat window
+chat.open();
+
+// Close the chat window
+chat.close();
 
 // Destroy the widget completely
 chat.destroy();
@@ -134,15 +155,18 @@ Return line-delimited JSON chunks:
 ### n8n
 
 1. **Create a Webhook Trigger**
+
    - Add a Webhook node to your workflow
    - Set it to accept POST requests
    - Note your webhook URL
 
 2. **Access the Data**
+
    - Message: `{{ $json.chatInput }}`
    - Session ID: `{{ $json.sessionId }}`
 
 3. **Return a Response**
+
    - Use "Respond to Webhook" node
    - Return: `{ "output": "Your response" }`
 
@@ -163,6 +187,7 @@ Return line-delimited JSON chunks:
 ### Custom Webhook
 
 Your endpoint should:
+
 1. Accept POST requests with JSON body
 2. Parse `chatInput` and `sessionId`
 3. Return JSON: `{ "output": "Your response" }`
@@ -199,6 +224,22 @@ agentName?: string;  // Default: "Assistant"
 
 The name displayed for the bot/agent in the chat interface.
 
+### logoUrl (optional)
+
+```typescript
+logoUrl?: string;
+```
+
+URL to a logo image that will be displayed in the chat interface.
+
+### enableDebugLogging (optional)
+
+```typescript
+enableDebugLogging?: boolean;  // Default: false
+```
+
+Enable debug logging to the browser console. Useful for troubleshooting webhook integration issues.
+
 ### theme (optional)
 
 ```typescript
@@ -216,6 +257,7 @@ storageType?: 'none' | 'localstorage';  // Default: 'none'
 ```
 
 Controls chat history persistence:
+
 - `'none'` - Messages are kept in memory only, lost on page refresh
 - `'localstorage'` - Messages are saved to browser localStorage, persist across sessions
 
@@ -226,6 +268,7 @@ mode?: 'fullscreen' | 'sidepanel';  // Default: 'fullscreen'
 ```
 
 Controls the display mode:
+
 - `'fullscreen'` - Takes up the entire viewport
 - `'sidepanel'` - Displays as a side panel (widget style)
 
@@ -240,19 +283,26 @@ Callback function that fires when a new chat session is created. Receives the se
 ## Troubleshooting
 
 ### Chat doesn't load
+
 - Check browser console for errors
 - Verify webhook URL is correct
 - Ensure webhook endpoint is active and accessible
 - Check CORS settings
 
 ### "Unable to reach the webhook" error
+
 - Verify webhook URL is correct
 - Check CORS configuration
 - Ensure your domain is allowlisted (for n8n)
 
 ### Messages not sending
+
 - Verify response format: `{ "output": "message" }`
 - Check webhook execution logs
+
+## Requirements
+
+- **Node.js**: Version 20.9.0 or higher (for development)
 
 ## Browser Support
 
@@ -267,8 +317,8 @@ MIT
 
 ## Support
 
-- GitHub Issues: [Create an issue](https://github.com/thesysai/chat-client/issues)
-- Documentation: [View docs](https://github.com/thesysai/chat-client)
+- GitHub Issues: [Create an issue](https://github.com/thesysdev/genui-widget/issues)
+- Documentation: [View docs](https://github.com/thesysdev/genui-widget)
 
 ## Contributing
 

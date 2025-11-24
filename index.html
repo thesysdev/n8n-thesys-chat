@@ -6,13 +6,17 @@
     <title>Thesys Chat Client Test</title>
   </head>
   <body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/genui-widget/dist/genui-widget.css"
+      rel="stylesheet"
+    />
+
     <script type="module">
-      import { createChat } from "/src/index.ts";
+      import { createChat } from "https://cdn.jsdelivr.net/npm/genui-widget/dist/genui-widget.es.js";
 
       const chat = createChat({
         n8n: {
-          webhookUrl:
-            "http://localhost:5678/webhook/3b68ad97-4a2a-4d9d-94ad-70a9b72f848a/chat",
+          webhookUrl: "<YOUR_WEBHOOK_URL>",
           enableStreaming: true,
         },
         agentName: "Test Bot",

@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "GenuiWidget",
-      formats: ["es", "umd"],
+      formats: ["es"],
       fileName: (format) => `genui-widget.${format}.js`,
     },
     rollupOptions: {
@@ -20,13 +20,8 @@ export default defineConfig({
         //   react: "React",
         //   "react-dom": "ReactDOM",
         // },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === "style.css") return "genui-widget.css";
-          return assetInfo.name || "assets/[name]-[hash][extname]";
-        },
       },
     },
-    sourcemap: true,
   },
   define: {
     "process.env": {},
