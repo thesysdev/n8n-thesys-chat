@@ -8,22 +8,28 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      name: "ThesysChat",
-      formats: ["es"],
-      fileName: () => "chat.bundle.es.js",
+      name: "GenuiWidget",
+      formats: ["es", "umd"],
+      fileName: (format) => `genui-widget.${format}.js`,
     },
     rollupOptions: {
       // Externalize peer dependencies
-      external: ["react", "react-dom"],
+      // external: ["react", "react-dom"],
       output: {
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
+        // globals: {
+        //   react: "React",
+        //   "react-dom": "ReactDOM",
+        // },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === "style.css") return "genui-widget.css";
+          return assetInfo.name || "assets/[name]-[hash][extname]";
         },
       },
     },
     sourcemap: true,
-    minify: "terser",
+  },
+  define: {
+    "process.env": {},
   },
   server: {
     port: 3000,
