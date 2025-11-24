@@ -6,7 +6,7 @@ on:
 jobs:
   publish:
     # prevents this action from running on forks
-    if: github.repository == 'thesysdev/chat-client'
+    if: github.repository == 'thesysdev/genui-widget'
     runs-on: ubuntu-latest
     permissions:
       contents: read
