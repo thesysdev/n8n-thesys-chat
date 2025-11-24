@@ -1,6 +1,7 @@
 {
-  "name": "@thesysai/genui-widget",
+  "name": "genui-widget",
   "version": "0.1.0",
+  "type": "module",
   "description": "Embeddable chat client for webhooks and workflow providers",
   "main": "./dist/chat.bundle.es.js",
   "module": "./dist/chat.bundle.es.js",
@@ -18,7 +19,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext ts,tsx"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@crayonai/react-ui": "^0.8.42",
@@ -30,12 +31,16 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.18.1",
     "vite": "^6.0.7"
   },
   "engines": {
@@ -43,5 +48,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "resolutions": {
+    "rollup": "npm:@rollup/wasm-node"
   }
 }

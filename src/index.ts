@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { createElement, useEffect } from "react";
+import { createElement } from "react";
 import {
   C1Chat,
   useThreadManager,
@@ -168,8 +168,7 @@ function ChatWithPersistence({
   storage: StorageAdapter;
   onSessionIdChange: (sessionId: string | null) => void;
 }) {
-  const formFactor =
-    config.mode === "sidepanel" ? "side-panel" : "full-page";
+  const formFactor = config.mode === "sidepanel" ? "side-panel" : "full-page";
 
   // Initialize thread list manager
   const threadListManager = useThreadListManager({
@@ -228,7 +227,7 @@ function ChatWithPersistence({
       threadId,
       messages,
       responseId,
-      abortController,
+      abortController: _abortController,
     }) => {
       log("[Storage] processMessage:", {
         threadId,

@@ -19,7 +19,7 @@ function isDebugEnabled(): boolean {
 /**
  * Log a message to console if debug logging is enabled
  */
-export function log(...args: any[]): void {
+export function log(...args: unknown[]): void {
   if (isDebugEnabled()) {
     console.log(...args);
   }
@@ -28,7 +28,7 @@ export function log(...args: any[]): void {
 /**
  * Log an error to console if debug logging is enabled
  */
-export function logError(...args: any[]): void {
+export function logError(...args: unknown[]): void {
   if (isDebugEnabled()) {
     console.error(...args);
   }
