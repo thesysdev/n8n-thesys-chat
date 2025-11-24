@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository == 'thesysdev/template-c1-next'
+    if: github.repository == 'thesysdev/n8n-chat'
     
     env:
       THESYS_API_KEY: dummy-api-key-for-testing

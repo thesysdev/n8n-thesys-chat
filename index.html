@@ -10,17 +10,17 @@
       import { createChat } from "/src/index.ts";
 
       const chat = createChat({
-        webhookUrl:
-          "http://localhost:5678/webhook/3b68ad97-4a2a-4d9d-94ad-70a9b72f848a/chat",
-        enableStreaming: true,
-        thesysGenUISDK: {
-          agentName: "Test Bot",
-          theme: { mode: "light" },
-          mode: "fullscreen", // Options: "fullscreen" (default) | "sidepanel"
-          storageType: "localstorage", // Options: "none" (default) | "localstorage"
-          onSessionStart: (sessionId) => {
-            console.log("Chat session started:", sessionId);
-          },
+        n8n: {
+          webhookUrl:
+            "http://localhost:5678/webhook/3b68ad97-4a2a-4d9d-94ad-70a9b72f848a/chat",
+          enableStreaming: true,
+        },
+        agentName: "Test Bot",
+        theme: { mode: "light" },
+        mode: "fullscreen", // Options: "fullscreen" (default) | "sidepanel"
+        storageType: "localstorage", // Options: "none" (default) | "localstorage"
+        onSessionStart: (sessionId) => {
+          console.log("Chat session started:", sessionId);
         },
       });
 

@@ -169,7 +169,7 @@ function ChatWithPersistence({
   onSessionIdChange: (sessionId: string | null) => void;
 }) {
   const formFactor =
-    config.thesysGenUISDK.mode === "sidepanel" ? "side-panel" : "full-page";
+    config.mode === "sidepanel" ? "side-panel" : "full-page";
 
   // Initialize thread list manager
   const threadListManager = useThreadListManager({
@@ -240,7 +240,7 @@ function ChatWithPersistence({
 
       // Call onSessionStart on first message
       if (messages.length === 1) {
-        config.thesysGenUISDK.onSessionStart?.(threadId);
+        config.onSessionStart?.(threadId);
       }
 
       // Save user messages
@@ -252,7 +252,7 @@ function ChatWithPersistence({
       const prompt = lastMessage?.content || "";
 
       // Call webhook
-      const response = await callWebhook(config, threadId, prompt);
+      const response = await callWebhook(config.n8n, threadId, prompt);
 
       // Wrap stream to save assistant message when complete
       if (response.body) {
@@ -307,9 +307,9 @@ function ChatWithPersistence({
   return createElement(C1Chat, {
     threadManager,
     threadListManager,
-    theme: config.thesysGenUISDK.theme,
-    agentName: config.thesysGenUISDK.agentName || "Assistant",
-    logoUrl: config.thesysGenUISDK.logoUrl,
+    theme: config.theme,
+    agentName: config.agentName || "Assistant",
+    logoUrl: config.logoUrl,
     formFactor,
   });
 }
@@ -333,7 +333,7 @@ function ChatWithPersistence({
  */
 export function createChat(config: ChatConfig): ChatInstance {
   // Validate required config
-  if (!config.webhookUrl) {
+  if (!config.n8n.webhookUrl) {
     throw new Error("n8n.webhookUrl is required");
   }
 
@@ -342,10 +342,10 @@ export function createChat(config: ChatConfig): ChatInstance {
     window.__THESYS_CHAT__ = {};
   }
   window.__THESYS_CHAT__.enableDebugLogging =
-    config.thesysGenUISDK.enableDebugLogging || false;
+    config.enableDebugLogging || false;
 
   // Create storage adapter
-  const storageType = config.thesysGenUISDK.storageType || "none";
+  const storageType = config.storageType || "none";
   const storage = createStorageAdapter(storageType);
 
   // Create container element
