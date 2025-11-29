@@ -63,33 +63,32 @@ async function callWebhook(
     throw new Error(`Webhook error: ${response.status} ${response.statusText}`);
   }
 
-  // Always try to parse as JSON first, regardless of streaming config
-  // This handles cases where backend sends JSON even when streaming is expected
-  const clonedResponse = response.clone();
-  try {
-    const data = await clonedResponse.json();
-    // Successfully parsed JSON - return it (backend sent JSON, not a stream)
-    return new Response(data.output || data.message || JSON.stringify(data));
-  } catch (error) {
-    // JSON parsing failed - might be a stream
-    // Check if streaming is enabled or Content-Type suggests streaming
-    const contentType = response.headers.get("Content-Type") || "";
-    const isStreaming =
-      n8nConfig.enableStreaming ||
-      contentType.includes("text/event-stream") ||
-      contentType.includes("application/x-ndjson");
+  // Check Content-Type to help determine how to handle the response
+  const contentType = response.headers.get("Content-Type") || "";
+  const isStreamContentType =
+    contentType.includes("text/event-stream") ||
+    contentType.includes("application/x-ndjson");
 
-    if (!isStreaming) {
-      // Not configured for streaming and JSON parsing failed
+  // Determine streaming behavior:
+  // - If user explicitly enabled streaming, trust that config (backend may send wrong Content-Type)
+  // - If Content-Type indicates streaming, handle as stream
+  const shouldStream = n8nConfig.enableStreaming || isStreamContentType;
+
+  // If NOT streaming, parse as JSON
+  if (!shouldStream) {
+    const clonedResponse = response.clone();
+    try {
+      const data = await clonedResponse.json();
+      // Successfully parsed JSON - return it
+      return new Response(data.output || data.message || JSON.stringify(data));
+    } catch (error) {
+      // JSON parsing failed - try to handle as stream as fallback
       if (!response.body) {
         throw new Error(
           `Failed to parse response as JSON and no body available: ${error}`
         );
       }
-      // Even if not explicitly streaming, try to handle as stream as fallback
-      log("JSON parsing failed, attempting to handle as stream");
     }
-    // Continue to streaming handling below
   }
 
   // For streaming, transform line-delimited JSON format to plain text stream
@@ -103,14 +102,27 @@ async function callWebhook(
   const stream = new ReadableStream({
     async start(controller) {
       let buffer = "";
+      let hasStreamedContent = false;
+
+      // Helper to extract content from various JSON formats
+      const extractContent = (data: Record<string, unknown>): string | null => {
+        // NDJSON streaming format: {"type":"item","content":"..."}
+        if (data.type === "item" && typeof data.content === "string") {
+          return data.content;
+        }
+        // Regular JSON response format: {"output":"..."} or {"message":"..."}
+        if (typeof data.output === "string") return data.output;
+        if (typeof data.message === "string") return data.message;
+        return null;
+      };
 
       try {
         while (true) {
           const { done, value } = await reader.read();
-
           if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
           const lines = buffer.split("\n");
 
           buffer = lines.pop() || "";
@@ -119,8 +131,10 @@ async function callWebhook(
             if (line.trim()) {
               try {
                 const data = JSON.parse(line);
-                if (data.type === "item" && data.content) {
-                  controller.enqueue(new TextEncoder().encode(data.content));
+                const content = extractContent(data);
+                if (content) {
+                  controller.enqueue(new TextEncoder().encode(content));
+                  hasStreamedContent = true;
                 }
               } catch (e) {
                 logError("Failed to parse streaming line:", line, e);
@@ -129,14 +143,23 @@ async function callWebhook(
           }
         }
 
+        // Process remaining buffer
         if (buffer.trim()) {
           try {
             const data = JSON.parse(buffer);
-            if (data.type === "item" && data.content) {
-              controller.enqueue(new TextEncoder().encode(data.content));
+            const content = extractContent(data);
+            if (content) {
+              controller.enqueue(new TextEncoder().encode(content));
+              hasStreamedContent = true;
             }
           } catch (e) {
-            logError("Failed to parse final streaming data:", buffer, e);
+            // Buffer might not be valid JSON - could be plain text
+            if (!hasStreamedContent) {
+              // If we haven't streamed anything, send buffer as-is
+              controller.enqueue(new TextEncoder().encode(buffer));
+            } else {
+              logError("Failed to parse final streaming data:", buffer, e);
+            }
           }
         }
       } catch (error) {
